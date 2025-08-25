@@ -20,8 +20,8 @@
 
 namespace analyser::metric::metric_impl {
 
-struct CyclomaticComplexityMetric: IMetric {
+struct CyclomaticComplexityMetric : IMetric {
     // здесь ваш код
 };
 
-} // namespace analyser::metric::metric_impl
+}  // namespace analyser::metric::metric_impl

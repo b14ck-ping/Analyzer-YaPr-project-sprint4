@@ -20,8 +20,8 @@
 
 namespace analyser::metric::metric_impl {
 
-struct NamingStyleMetric: IMetric {
+struct NamingStyleMetric : IMetric {
     // здесь ваш код
 };
 
-} // namespace analyser::metric::metric_impl
+}  // namespace analyser::metric::metric_impl

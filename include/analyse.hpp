@@ -27,22 +27,22 @@ namespace analyser {
 namespace rv = std::ranges::views;
 namespace rs = std::ranges;
 
-auto AnalyseFunctions(const std::vector<std::string>& files,
-                      const analyser::metric::MetricExtractor& metric_extractor) {
+auto AnalyseFunctions(const std::vector<std::string> &files,
+                      const analyser::metric::MetricExtractor &metric_extractor) {
     // здесь ваш код
 }
 
-auto SplitByClasses(const auto& analysis) {
+auto SplitByClasses(const auto &analysis) {
     // здесь ваш код
 }
 
-auto SplitByFiles(const auto& analysis) {
+auto SplitByFiles(const auto &analysis) {
     // здесь ваш код
 }
 
-void AccumulateFunctionAnalysis(
-    const auto& analysis, const analyser::metric_accumulator::MetricsAccumulator& accumulator) {
+void AccumulateFunctionAnalysis(const auto &analysis,
+                                const analyser::metric_accumulator::MetricsAccumulator &accumulator) {
     // здесь ваш код
 }
 
-} // namespace analyser
+}  // namespace analyser

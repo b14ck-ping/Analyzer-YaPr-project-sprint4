@@ -14,6 +14,7 @@ execute_process(
 
 find_package(GTest REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(range-v3 REQUIRED)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
@@ -32,6 +33,8 @@ target_link_libraries(${target}
         metric
         cmd_options
         range-v3::range-v3
+        Boost::program_options
+        GTest::gtest
 )
 
 include(CTest)
