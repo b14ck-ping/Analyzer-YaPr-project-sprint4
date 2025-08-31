@@ -1,3 +1,5 @@
+#include <iterator>
+#include <string_view>
 #include <unistd.h>
 
 #include <algorithm>
@@ -27,9 +29,24 @@ namespace analyser {
 namespace rv = std::ranges::views;
 namespace rs = std::ranges;
 
-auto AnalyseFunctions(const std::vector<std::string> &files,
-                      const analyser::metric::MetricExtractor &metric_extractor) {
-    // здесь ваш код
+inline auto AnalyseFunctions(const std::vector<std::string> &files,
+                             const analyser::metric::MetricExtractor &metric_extractor)
+    -> std::vector<std::pair<function::Function, analyser::metric::MetricResults>> {
+
+    using out_item_type = std::pair<function::Function, analyser::metric::MetricResults>;
+
+    auto file_creator = [](const std::string &file_name) { return analyser::file::File(file_name); };
+    auto function_extraction = [](const analyser::file::File &file) {
+        return analyser::function::FunctionExtractor{}.Get(file);
+    };
+    auto metric_extraction = [&metric_extractor](const function::Function &func) {
+        return std::pair{func, metric_extractor.Get(func)};
+    };
+
+    auto functions_metrics_view = files | rv::transform(file_creator) | rv::transform(function_extraction) | rv::join |
+                                  rv::transform(metric_extraction);
+
+    return rs::to<std::vector<out_item_type>>(functions_metrics_view);
 }
 
 auto SplitByClasses(const auto &analysis) {

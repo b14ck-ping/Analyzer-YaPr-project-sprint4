@@ -10,8 +10,8 @@
             "name": "Launch Analyser",
             "program": "${workspaceFolder}/build/analyser",
             "args": [
-                "-i",
-                "files/sample.py",
+                "-f",
+                "/workspaces/Analyzer-YaPr-project-sprint2/files/sample.py",
             ],
             "cwd": "${workspaceFolder}/build",
             "preLaunchTask": "GCC: Build Debug app",

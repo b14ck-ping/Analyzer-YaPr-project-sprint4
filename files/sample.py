@@ -1,9 +1,15 @@
 class AdvancedProcessor(SimpleProcessor):
     """Продвинутый процессор данных с дополнительной функциональностью"""
     
-    def __init__(self, multiplier: float = 1.0, offset: float = 0.0):
+    def __init__(self,  multiplier: float = 1.0, offset: float = 0.0, arg):
         super().__init__(multiplier)
-        self.offset = offset
+        self.arg_=arg
+        if offset:
+            #Comment
+
+            self.offset = offset
+        else:
+            self.offset = None
     
     @log_execution(log_level=LogLevel.DEBUG)
     def process(self, data: List[Union[int, float]]) -> List[float]:
