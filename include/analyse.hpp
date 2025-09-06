@@ -49,17 +49,13 @@ inline auto AnalyseFunctions(const std::vector<std::string> &files,
     return rs::to<std::vector<out_item_type>>(functions_metrics_view);
 }
 
-auto SplitByClasses(const auto &analysis) {
-    // здесь ваш код
-}
+auto SplitByClasses(const auto &analysis) {}
 
-auto SplitByFiles(const auto &analysis) {
-    // здесь ваш код
-}
+auto SplitByFiles(const auto &analysis) {}
 
 void AccumulateFunctionAnalysis(const auto &analysis,
                                 const analyser::metric_accumulator::MetricsAccumulator &accumulator) {
-    // здесь ваш код
+    rs::for_each(analysis, )
 }
 
 }  // namespace analyser

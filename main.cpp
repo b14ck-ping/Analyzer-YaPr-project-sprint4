@@ -57,19 +57,34 @@ int main(int argc, char *argv[]) {
             std::println("\t{}: {}", metric.metric_name, metric.value);
     }
 
-    // analyser::metric_accumulator::MetricsAccumulator accumulator;
+    using namespace analyser::metric_accumulator;
+    MetricsAccumulator accumulator;
     // зарегистрируйте аккумуляторы метрик в accumulator
+    accumulator.RegisterAccumulator("code_lines_count", std::make_unique<metric_accumulator_impl::SumAverageAccumulator>());
+    accumulator.RegisterAccumulator("cyclomatic_complexity", std::make_unique<metric_accumulator_impl::SumAverageAccumulator>());
+    accumulator.RegisterAccumulator("parameters_count", std::make_unique<metric_accumulator_impl::AverageAccumulator>());
 
     // запустите analyser::SplitByFiles
+
+
     // запустите analyser::AccumulateFunctionAnalysis для каждого подмножества результатов метрик
+    
     
     // выведете результаты на консоль
 
+
     // запустите analyser::SplitByClasses
+
+
     // запустите analyser::AccumulateFunctionAnalysis для каждого подмножества результатов метрик
+
+
     // выведете результаты на консоль
 
+
     // запустите analyser::AccumulateFunctionAnalysis для всех результатов метрик
+
+
     // выведете результаты на консоль
 
     return 0;

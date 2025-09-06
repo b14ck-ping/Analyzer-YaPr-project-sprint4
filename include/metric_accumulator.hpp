@@ -1,4 +1,5 @@
 #pragma once
+#include <stdexcept>
 #include <unistd.h>
 
 #include <algorithm>
@@ -35,17 +36,39 @@ protected:
 };
 
 struct MetricsAccumulator {
+
     template <typename Accumulator>
     void RegisterAccumulator(const std::string &metric_name, std::unique_ptr<Accumulator> acc) {
-        // здесь ваш код
+        accumulators.insert(std::pair{metric_name, std::move(acc)});
     }
+
     template <typename Accumulator>
     const Accumulator &GetFinalizedAccumulator(const std::string &metric_name) const {
-        // здесь ваш код
-    }
-    void AccumulateNextFunctionResults(const std::vector<metric::MetricResult> &metric_results) const;
+        auto it = accumulators.find(metric_name);
+        if (it == accumulators.end())
+            throw std::logic_error("Can't find accumulator for " + metric_name);
 
-    void ResetAccumulators();
+        auto ptr = std::dynamic_pointer_cast<Accumulator>(it->second);
+        if (!ptr)
+            throw std::logic_error("Can't cast accumulator for " + metric_name + " to IAccumulator.");
+
+        return ptr;
+    }
+
+    void AccumulateNextFunctionResults(const std::vector<metric::MetricResult> &metric_results) const {
+
+        auto it = accumulators.find(metric_name);
+        if (it == accumulators.end())
+            throw std::logic_error("Can't find accumulator for " + metric_name);
+
+        auto ptr = std::dynamic_pointer_cast<Accumulator>(it->second);
+        if (!ptr)
+            throw std::logic_error("Can't cast accumulator for " + metric_name + " to IAccumulator.");
+
+        return ptr;
+    }
+
+    void ResetAccumulators() { rs }
 
 private:
     std::unordered_map<std::string, std::shared_ptr<IAccumulator>> accumulators;
