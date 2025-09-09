@@ -51,24 +51,13 @@ struct MetricsAccumulator {
         auto ptr = std::dynamic_pointer_cast<Accumulator>(it->second);
         if (!ptr)
             throw std::logic_error("Can't cast accumulator for " + metric_name + " to IAccumulator.");
-
-        return ptr;
+        ptr->Finalize();
+        return *ptr;
     }
 
-    void AccumulateNextFunctionResults(const std::vector<metric::MetricResult> &metric_results) const {
+    void AccumulateNextFunctionResults(const std::vector<metric::MetricResult> &metric_results) const;
 
-        auto it = accumulators.find(metric_name);
-        if (it == accumulators.end())
-            throw std::logic_error("Can't find accumulator for " + metric_name);
-
-        auto ptr = std::dynamic_pointer_cast<Accumulator>(it->second);
-        if (!ptr)
-            throw std::logic_error("Can't cast accumulator for " + metric_name + " to IAccumulator.");
-
-        return ptr;
-    }
-
-    void ResetAccumulators() { rs }
+    void ResetAccumulators();
 
 private:
     std::unordered_map<std::string, std::shared_ptr<IAccumulator>> accumulators;

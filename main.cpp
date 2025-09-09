@@ -50,12 +50,14 @@ int main(int argc, char *argv[]) {
 
     // запустите analyser::AnalyseFunctions
     auto functions = analyser::AnalyseFunctions(files, metric_extractor);
+
     // выведете результаты анализа на консоль
-    for (auto func : functions){
+    rs::for_each (functions, [](const auto &func) {
         std::println("{}{}::{}:", func.first.filename, func.first.class_name ? std::string("::") + *func.first.class_name : "", func.first.name);
-        for (auto metric : func.second)
+        for (const auto& metric : func.second)
             std::println("\t{}: {}", metric.metric_name, metric.value);
-    }
+    });
+    std::println();
 
     using namespace analyser::metric_accumulator;
     MetricsAccumulator accumulator;
@@ -65,27 +67,61 @@ int main(int argc, char *argv[]) {
     accumulator.RegisterAccumulator("parameters_count", std::make_unique<metric_accumulator_impl::AverageAccumulator>());
 
     // запустите analyser::SplitByFiles
-
+    auto by_files = analyser::SplitByFiles(functions);
 
     // запустите analyser::AccumulateFunctionAnalysis для каждого подмножества результатов метрик
-    
-    
-    // выведете результаты на консоль
+    rs::for_each (by_files, [&accumulator](auto& file) {
+        auto [file_name, analysis] = file;
+        std::println("Accumulated Analysis for file {}:", file_name);
+        accumulator.ResetAccumulators();
+       
 
+        analyser::AccumulateFunctionAnalysis(analysis, accumulator);
+
+        auto lines = accumulator.GetFinalizedAccumulator<metric_accumulator_impl::SumAverageAccumulator>("code_lines_count").Get();
+        auto complexity = accumulator.GetFinalizedAccumulator<metric_accumulator_impl::SumAverageAccumulator>("cyclomatic_complexity").Get();
+        auto params = accumulator.GetFinalizedAccumulator<metric_accumulator_impl::AverageAccumulator>("parameters_count").Get();
+
+        std::println("\tcode_lines_count: {}:", lines.sum);
+        std::println("\tcyclomatic_complexity: {}:", complexity.sum);
+        std::println("\tparameters_count: {}:", params);
+    });
+    std::println();
 
     // запустите analyser::SplitByClasses
-
+    auto by_classes = analyser::SplitByClasses(functions);
 
     // запустите analyser::AccumulateFunctionAnalysis для каждого подмножества результатов метрик
+    rs::for_each (by_classes, [&accumulator](auto& file) {
+        auto [file_name, analysis] = file;
+        std::println("Accumulated Analysis for class {}:", file_name);
+        accumulator.ResetAccumulators();
+       
 
+        analyser::AccumulateFunctionAnalysis(analysis, accumulator);
 
-    // выведете результаты на консоль
+        auto lines = accumulator.GetFinalizedAccumulator<metric_accumulator_impl::SumAverageAccumulator>("code_lines_count").Get();
+        auto complexity = accumulator.GetFinalizedAccumulator<metric_accumulator_impl::SumAverageAccumulator>("cyclomatic_complexity").Get();
+        auto params = accumulator.GetFinalizedAccumulator<metric_accumulator_impl::AverageAccumulator>("parameters_count").Get();
+
+        std::println("\tcode_lines_count: {}:", lines.sum);
+        std::println("\tcyclomatic_complexity: {}:", complexity.sum);
+        std::println("\tparameters_count: {}:", params);
+    });
+    std::println();
 
 
     // запустите analyser::AccumulateFunctionAnalysis для всех результатов метрик
+    std::println("Accumulated Analysis for all results:");
+    accumulator.ResetAccumulators();
 
+    analyser::AccumulateFunctionAnalysis(functions, accumulator);
 
-    // выведете результаты на консоль
+    auto lines = accumulator.GetFinalizedAccumulator<metric_accumulator_impl::SumAverageAccumulator>("code_lines_count").Get();
+    auto complexity = accumulator.GetFinalizedAccumulator<metric_accumulator_impl::SumAverageAccumulator>("cyclomatic_complexity").Get();
+
+    std::println("\tcode_lines_count: {}:", lines.sum);
+    std::println("\tcyclomatic_complexity: {}:", complexity.sum);
 
     return 0;
 }

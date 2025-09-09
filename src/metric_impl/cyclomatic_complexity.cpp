@@ -38,7 +38,6 @@ MetricResult::ValueType CyclomaticComplexityMetric::CalculateImpl(const function
                                 [sv](const std::string_view expr) { return sv.find(expr) != std::string_view::npos; });
 
         if (item != expressions.end()) {
-            std::println("Found: {}", sv);
             return true;
         } else
             return false;
