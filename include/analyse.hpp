@@ -35,8 +35,6 @@ using AnalyseResults = std::vector<AnalyseResultItem>;
 inline auto AnalyseFunctions(const std::vector<std::string> &files,
                              const analyser::metric::MetricExtractor &metric_extractor) -> AnalyseResults {
 
-    using out_item_type = std::pair<function::Function, analyser::metric::MetricResults>;
-
     auto file_creator = [](const std::string &file_name) { return analyser::file::File(file_name); };
     auto function_extraction = [](const analyser::file::File &file) {
         return analyser::function::FunctionExtractor{}.Get(file);
@@ -48,47 +46,50 @@ inline auto AnalyseFunctions(const std::vector<std::string> &files,
     auto functions_metrics_view = files | rv::transform(file_creator) | rv::transform(function_extraction) | rv::join |
                                   rv::transform(metric_extraction);
 
-    return rs::to<std::vector<out_item_type>>(functions_metrics_view);
+    return rs::to<AnalyseResults>(functions_metrics_view);
 }
 
 auto SplitByClasses(const auto &analysis) -> std::unordered_map<std::string, AnalyseResults> {
-    auto analysis_filtered_vector = analysis | rs::to<std::vector>() | rv::filter([](AnalyseResultItem &func) {
-                                        auto [fun, analysis] = func;
-                                        return fun.class_name.has_value();
-                                    }) |
-                                    rs::to<std::vector>();
 
-    rs::sort(analysis_filtered_vector, [](const AnalyseResultItem &a, const AnalyseResultItem &b) {
-        return a.first.filename < b.first.filename;
-    });
-    auto sorted_analysis_vec = rs::to<std::vector>(analysis_filtered_vector);
+    auto filter_by_classes = [](AnalyseResultItem &func) { return func.first.class_name.has_value(); };
+    auto less_classname = [](const AnalyseResultItem &a, const AnalyseResultItem &b) {
+        return *a.first.class_name < *b.first.class_name;
+    };
+    auto chunker = [](const AnalyseResultItem &a, const AnalyseResultItem &b) {
+        return *a.first.class_name == *b.first.class_name;
+    };
+    auto transformer = [](const auto &chunk) {
+        AnalyseResults vec;
+        vec = rs::to<std::vector>(chunk);
+        return std::make_pair(*vec.front().first.class_name, std::move(vec));
+    };
 
-    return sorted_analysis_vec | rv::chunk_by([](const AnalyseResultItem &a, const AnalyseResultItem &b) {
-               return *a.first.class_name == *b.first.class_name;
-           }) |
-           rv::transform([](const auto &chunk) {
-               AnalyseResults vec;
-               vec = rs::to<std::vector>(chunk);
-               return std::make_pair(*vec.front().first.class_name, std::move(vec));
-           }) |
+    auto sorted_filtered_analisys =
+        analysis | rs::to<std::vector>() | rv::filter(filter_by_classes) | rs::to<std::vector>();
+    rs::sort(sorted_filtered_analisys, less_classname);
+
+    return sorted_filtered_analisys | rs::to<std::vector>() | rv::chunk_by(chunker) | rv::transform(transformer) |
            rs::to<std::unordered_map<std::string, AnalyseResults>>();
 }
 
 inline auto SplitByFiles(const AnalyseResults &analysis) -> std::unordered_map<std::string, AnalyseResults> {
-    auto analysis_vector = rs::to<std::vector>(analysis);
-    rs::sort(analysis_vector, [](const AnalyseResultItem &a, const AnalyseResultItem &b) {
-        return a.first.filename < b.first.filename;
-    });
-    auto sorted_analysis_vec = rs::to<std::vector>(analysis_vector);
 
-    return sorted_analysis_vec | rv::chunk_by([](const AnalyseResultItem &a, const AnalyseResultItem &b) {
-               return a.first.filename == b.first.filename;
-           }) |
-           rv::transform([](const auto &chunk) {
-               AnalyseResults vec;
-               vec = rs::to<std::vector>(chunk);
-               return std::make_pair(vec.front().first.filename, std::move(vec));
-           }) |
+    auto less_filename = [](const AnalyseResultItem &a, const AnalyseResultItem &b) {
+        return a.first.filename < b.first.filename;
+    };
+    auto chunker = [](const AnalyseResultItem &a, const AnalyseResultItem &b) {
+        return a.first.filename == b.first.filename;
+    };
+    auto transformer = [](const auto &chunk) {
+        AnalyseResults vec;
+        vec = rs::to<std::vector>(chunk);
+        return std::make_pair(vec.front().first.filename, std::move(vec));
+    };
+
+    auto sorted_filtered_analisys = rs::to<std::vector>(analysis);
+    rs::sort(sorted_filtered_analisys, less_filename);
+
+    return sorted_filtered_analisys | rs::to<std::vector>() | rv::chunk_by(chunker) | rv::transform(transformer) |
            rs::to<std::unordered_map<std::string, AnalyseResults>>();
 }
 

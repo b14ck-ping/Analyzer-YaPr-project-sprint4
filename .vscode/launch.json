@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/build/analyser",
             "args": [
                 "-f",
-                "/workspaces/Analyzer-YaPr-project-sprint2/files/sample.py",
+                "/workspaces/Analyzer-YaPr-project-sprint2/files/sample.py"
             ],
             "cwd": "${workspaceFolder}/build",
             "preLaunchTask": "GCC: Build Debug app",
