@@ -21,8 +21,16 @@
 
 namespace analyser::metric::metric_impl {
 
+size_t offset_counter(std::string_view sv) {
+    return rs::distance(sv.begin(), rs::find_if(sv, [](const char c) { return c != ' '; }));
+};
+
 MetricResult::ValueType CountParametersMetric::CalculateImpl(const function::Function &f) const {
-    MetricResult::ValueType line_counter = 0;
+
+    size_t main_offset = 0;
+
+    auto lines_taker = [&main_offset](std::string_view sv) { return offset_counter(sv) != main_offset; };
+    auto parameter_lines_filter = [&main_offset](std::string_view sv) { return offset_counter(sv) == main_offset + 2; };
 
     std::string_view delim{"\n"};
     auto filtered_view =
@@ -30,20 +38,13 @@ MetricResult::ValueType CountParametersMetric::CalculateImpl(const function::Fun
         rv::transform([](auto &&subrange) { return std::string_view(subrange.begin(), subrange.end()); }) |
         rv::drop_while([](std::string_view line) { return line.find("parameters:") == std::string_view::npos; });
 
-    auto parameters_block_range = rs::subrange(
-        rs::next(rs::begin(filtered_view)), rs::find_if(filtered_view, [](std::string_view line) {
-            return line.find("body:") != std::string_view::npos || line.find("return_type:") != std::string_view::npos;
-        }));
+    if (filtered_view.begin() == filtered_view.end())
+        return 0;
 
-    size_t main_offset =
-        rs::distance((*parameters_block_range.begin()).begin(),
-                     rs::find_if(*parameters_block_range.begin(), [](const char c) { return c != ' '; }));
+    main_offset = offset_counter(*filtered_view.begin());
 
-    auto params_list_view = rv::all(parameters_block_range) | rv::transform([main_offset](std::string_view sv) {
-                                size_t offset = std::min(main_offset, sv.size());
-                                return std::string_view{sv.begin() + offset, sv.end()};
-                            }) |
-                            rv::filter([](std::string_view sv) { return *sv.begin() != ' '; });
+    auto params_list_view =
+        filtered_view | rv::drop(1) | rv::take_while(lines_taker) | rv::filter(parameter_lines_filter);
 
     return rs::distance(params_list_view.begin(), params_list_view.end());
 }

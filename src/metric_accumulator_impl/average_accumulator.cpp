@@ -29,7 +29,8 @@ void AverageAccumulator::Accumulate(const analyser::metric::MetricResult &metric
 }
 
 void AverageAccumulator::Finalize() {
-    this->average = static_cast<double>(this->sum) / static_cast<double>(this->count);
+    if (this->count != 0)
+        this->average = static_cast<double>(this->sum) / static_cast<double>(this->count);
     is_finalized = true;
 }
 
