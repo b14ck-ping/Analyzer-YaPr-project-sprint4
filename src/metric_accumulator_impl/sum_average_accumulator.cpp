@@ -19,6 +19,32 @@
 
 namespace analyser::metric_accumulator::metric_accumulator_impl {
 
-// здесь ваш код
+void SumAverageAccumulator::Accumulate(const metric::MetricResult &metric_result) {
+    if (is_finalized)
+        throw std::logic_error("Already finalized");
+
+    this->sum += metric_result.value;
+    ++this->count;
+}
+
+void SumAverageAccumulator::Finalize() {
+    if (this->count != 0)
+        this->average = static_cast<double>(this->sum) / static_cast<double>(this->count);
+    is_finalized = true;
+}
+
+void SumAverageAccumulator::Reset() {
+    this->sum = 0;
+    this->count = 0;
+    this->average = 0;
+    is_finalized = false;
+}
+
+SumAverageAccumulator::SumAverage SumAverageAccumulator::Get() const {
+    if (!is_finalized)
+        throw std::logic_error("Not finalized");
+
+    return SumAverageAccumulator::SumAverage{sum, average};
+}
 
 }  // namespace analyser::metric_accumulator::metric_accumulator_impl

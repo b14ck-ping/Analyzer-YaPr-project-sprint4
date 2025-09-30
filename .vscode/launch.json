@@ -8,14 +8,14 @@
             "type": "lldb",
             "request": "launch",
             "name": "Launch Analyser",
-            "program": "${workspaceFolder}/build/Analyser",
+            "program": "${workspaceFolder}/build/analyser",
             "args": [
-                "-i",
-                "input.txt",
-                "--command",
-                "checksum"
+                "-f",
+                "/workspaces/Analyzer-YaPr-project-sprint2/files/sample.py"
             ],
-            "cwd": "${workspaceFolder}/build"
+            "cwd": "${workspaceFolder}/build",
+            "preLaunchTask": "GCC: Build Debug app",
+            "initCommands": ["settings set target.disable-aslr false"]
         }
 
     ]

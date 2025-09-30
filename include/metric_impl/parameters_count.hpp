@@ -16,8 +16,13 @@
 
 namespace analyser::metric::metric_impl {
 
-struct CountParametersMetric final: public IMetric {
-    // здесь ваш код
+struct CountParametersMetric final : public IMetric {
+    CountParametersMetric() = default;
+    ~CountParametersMetric() override = default;
+
+protected:
+    MetricResult::ValueType CalculateImpl(const function::Function &f) const override;
+    std::string Name() const override;
 };
 
-} // namespace analyser::metric::metric_impl
+}  // namespace analyser::metric::metric_impl

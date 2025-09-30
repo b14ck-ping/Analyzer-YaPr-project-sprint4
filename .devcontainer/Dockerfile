@@ -40,8 +40,13 @@ RUN chmod 755 /root/.config
 RUN chmod 755 /root/.config/tree-sitter
 RUN chmod 644 /root/.config/tree-sitter/config.json
 
-# Switch to the 'dev' user
-USER dev
+# Copy conan profile
+COPY default /home/ubuntu/.conan2/profiles/default
+RUN chown -R ubuntu:ubuntu /home/ubuntu/.conan2
+RUN chmod 666 /home/ubuntu/.conan2/profiles/default
+
+# Switch to the 'ubuntu' user
+USER ubuntu
 
 RUN ls /root/.config/tree-sitter/config.json 
 
@@ -51,10 +56,7 @@ RUN git config --global core.editor code
 RUN pipx install conan
 RUN pipx ensurepath
 
-# Copy conan profile
-COPY default /home/dev/.conan2/profiles/default
-RUN sudo chown -R dev:dev /home/dev/.conan2
-RUN sudo chmod 666 /home/dev/.conan2/profiles/default
+
 
 # Set the default command
 CMD ["/bin/bash"]
